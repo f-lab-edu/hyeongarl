@@ -5,14 +5,8 @@ build/
 
 ### IntelliJ IDEA ###
 .idea/
-*.iml
-*.iws
-*.ipr
 out/
 
 ### Common Java ignores ###
 *.class
 *.log
-
-### General ###
-*~
