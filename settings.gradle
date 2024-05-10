@@ -1,0 +1,2 @@
+rootProject.name = 'hyeongarl'
+include 'api'
