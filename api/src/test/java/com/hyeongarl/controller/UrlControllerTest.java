@@ -1,148 +1,93 @@
 package com.hyeongarl.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hyeongarl.dto.UrlRequestDTO;
-import com.hyeongarl.dto.UrlResponseDTO;
-import com.hyeongarl.entity.Url;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import com.hyeongarl.dto.UrlRequestDto;
+import com.hyeongarl.dto.UrlResponseDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UrlControllerTest {
-
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
+    // (webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) 있어야 autowired 가능
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Test   // POST /url 등록
+    public void testCreateUrl() {
+        UrlRequestDto request
+                = new UrlRequestDto("create.com", "create Title", "create Description", 1L);
 
-    private UrlRequestDTO urlRequest;
-    private UrlResponseDTO urlResponse;
-    private List<UrlResponseDTO> urlResponseList;
+        ResponseEntity<UrlResponseDto> responseEntity
+                = restTemplate.postForEntity("/url", request, UrlResponseDto.class);
 
-    // TestData
-    private static final Long URL_ID=10L;
-    private static final String URL_NAME="www.example.com";
-    private static final String URL_TITLE="Test Title";
-    private static final String URL_DESCRIPTION="Test Description";
-    private static final Long CATEGORY_ID=1L;
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-    @BeforeEach
-    void setUp() {  // TestData
-        urlRequest = UrlRequestDTO.builder()
-                .url(URL_NAME)
-                .urlTitle(URL_TITLE)
-                .urlDescription(URL_DESCRIPTION)
-                .categoryId(CATEGORY_ID)
-                .build();
+        UrlResponseDto responseBody = responseEntity.getBody();
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody.getUrl()).isEqualTo("create.com");
+        assertThat(responseBody.getUrlTitle()).isEqualTo("create Title");
+        assertThat(responseBody.getUrlDescription()).isEqualTo("create Description");
+    }
 
-        urlResponse = UrlResponseDTO.builder()
-                .urlId(URL_ID)
-                .url(URL_NAME)
-                .urlTitle(URL_TITLE)
-                .urlDescription(URL_DESCRIPTION)
-                .categoryId(CATEGORY_ID)
-                .urlRegDate(null)
-                .urlUpdateDate(null)
-                .build();
-
-        urlResponseList = Arrays.asList(
-                new UrlResponseDTO(1L, "example.com", "Example Title", "Example Description", 1L, null, null),
-                new UrlResponseDTO(2L, "sample.com", "Sample Title", "Sample Description", 2L, null, null),
-                new UrlResponseDTO(3L, "test.com", "Test Title", "Test Description", 3L, null, null)
+    @Test   // GET /url 목록 조회
+    public void testGetUrls() {
+        ResponseEntity<List<UrlResponseDto>> responseEntity = restTemplate.exchange(
+                "/url", HttpMethod.GET, null, new ParameterizedTypeReference<List<UrlResponseDto>>() {}
         );
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        List<UrlResponseDto> responseBody = responseEntity.getBody();
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody.size()).isEqualTo(3);
     }
 
-    @Test   // URL 등록
-    @DisplayName("POST /url : CREATE URL")
-    void createURL() throws Exception {
-        //given
-        Url url = urlRequest.toEntity();
-        String urlJson = objectMapper.writeValueAsString(url);
+    @Test   // GET url/1 상세 조회
+    public void testGetUrl() {
+        ResponseEntity<UrlResponseDto> responseEntity = restTemplate.getForEntity("/url/10", UrlResponseDto.class);
 
-        //when
-        ResultActions action = mockMvc.perform(post("/url")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(urlJson));
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        //then
-        action.andExpect(status().isCreated())
-                //.andExpect(content().string(containsString("Test Title")))
-                .andDo(print());
+        UrlResponseDto responseBody = responseEntity.getBody();
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody.getUrlId()).isEqualTo(10L);
     }
 
-    @Test   // URL 목록 조회
-    @DisplayName("GET /url/list/{userId} : GET URLS")
-    void getUrls() throws Exception {
-        //given
-        Long userId = 1L;
+    @Test   // PUT /url/2 수정
+    public void testUpdateUrl() {
+        UrlRequestDto request
+                = new UrlRequestDto("update.com", "update Title", "update Description", 2L);
 
-        //when
-        ResultActions action = mockMvc.perform(get("/url/"+userId));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<UrlRequestDto> entity = new HttpEntity<>(request, headers);
 
-        //then
-        action.andExpect(status().isOk())
-                .andDo(print());
+        ResponseEntity<UrlResponseDto> responseEntity
+                = restTemplate.exchange("/url/2", HttpMethod.PUT, entity, UrlResponseDto.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        UrlResponseDto responseBody = responseEntity.getBody();
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody.getUrl()).isEqualTo("update.com");
+        assertThat(responseBody.getUrlTitle()).isEqualTo("update Title");
+        assertThat(responseBody.getUrlDescription()).isEqualTo("update Description");
     }
 
-    @Test   // URL 조회
-    @DisplayName("GET /url/{urlId} : GET URL")
-    void getUrl() throws Exception {
-        //given
-        Long urlId = 10L;
+    @Test   // DELETE /url/1 삭제 요청
+    public void testDeleteUrl() {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        //when
-        ResultActions action = mockMvc.perform(get("/url/" + urlId));
+        ResponseEntity<Void> responseEntity = restTemplate.exchange("/url/1", HttpMethod.DELETE, entity, Void.class);
 
-        //then
-        action.andExpect(status().isOk())
-                .andExpect(jsonPath("$.url").value(URL_NAME))
-                .andDo(print());
-    }
-
-    @Test   // URL 수정
-    @DisplayName("PUT /url/{urlId} : UPDATE URL")
-    void updateUrl() throws Exception {
-        //given
-        Long urlId = 10L;
-
-        //when
-        ResultActions action = mockMvc.perform(put("/url/" + urlId)
-                .content(objectMapper.writeValueAsString(urlRequest))
-                .contentType(MediaType.APPLICATION_JSON));
-
-        //then
-        action.andExpect(status().isOk())
-                .andExpect(jsonPath("$.urlId").value(URL_ID))
-                .andDo(print());
-    }
-
-    @Test   // URL 삭제
-    @DisplayName("DELETE /url/{urlId} :DELETE URL")
-    void deleteUrl() throws Exception{
-        //given
-        Long urlId = 1L;
-
-        //when
-        ResultActions action = mockMvc.perform(delete("/url/" + urlId));
-
-        //then
-        action.andExpect(status().isNoContent())
-                .andDo(print());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

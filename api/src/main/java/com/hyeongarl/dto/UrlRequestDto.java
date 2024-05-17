@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UrlRequestDTO {
+public class UrlRequestDto {
     @NotNull(message="URL is required")
     private String url;
 

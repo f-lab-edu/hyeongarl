@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UrlResponseDTO {
+public class UrlResponseDto {
     private Long urlId;
     private String url;
     private String urlTitle;
