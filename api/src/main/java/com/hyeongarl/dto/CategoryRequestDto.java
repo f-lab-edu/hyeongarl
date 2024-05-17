@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryRequestDTO {
+public class CategoryRequestDto {
     @NotBlank(message="CategoryName is required")
     private String categoryName;
     private Long categoryPreId;

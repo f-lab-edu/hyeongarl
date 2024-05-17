@@ -1,11 +1,10 @@
 package com.hyeongarl.controller;
 
-import com.hyeongarl.dto.CategoryRequestDTO;
-import com.hyeongarl.dto.CategoryResponseDTO;
+import com.hyeongarl.dto.CategoryRequestDto;
+import com.hyeongarl.dto.CategoryResponseDto;
 import com.hyeongarl.entity.Category;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -14,16 +13,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
-
     // Sample Data
     private Category cate = Category.builder()
             .categoryId(1L)
-            .categoryName("Test Category")
+            .categoryName("create Name")
             .categoryPreId(10L)
             .userId(1L)
             .categoryRegDate(null)
             .categoryUpdateDate(null)
             .build();
+
+    // Sample Data
+    List<CategoryResponseDto> categories = Arrays.asList(
+            new CategoryResponseDto(1L, "ExampleName", 1L, null, null, null, null),
+            new CategoryResponseDto(2L, "SampleName", 2L, null, null, null, null),
+            new CategoryResponseDto(3L, "TestName", 3L, null, null, null, null)
+    );
 
     /**
      * Category 등록
@@ -32,26 +37,18 @@ public class CategoryController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDTO categoryRequest) {
-        CategoryResponseDTO response = convertToResponseDTO(categoryRequest.toEntity());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryRequestDto categoryRequest) {
+        CategoryResponseDto response = convertToResponseDTO(categoryRequest.toEntity());
+        return response;
     }
 
     /**
      * Category 목록 조회
-     * @param userId 사용자 ID
      * @return 사용자 카테고리 목록
      */
-    @GetMapping("/list/{userId}")
-    public ResponseEntity<List<CategoryResponseDTO>> getCategories(@PathVariable Long userId){
-        List<CategoryResponseDTO> result = Arrays.asList(
-                new CategoryResponseDTO(1L, "ExampleName", 1L, null, null, null, null),
-                new CategoryResponseDTO(2L, "SampleName", 2L, null, null, null, null),
-                new CategoryResponseDTO(3L, "TestName", 3L, null, null, null, null)
-        );
-
-        return ResponseEntity.ok(result);
+    @GetMapping
+    public List<CategoryResponseDto> getCategories(){
+        return categories;
     }
 
     /**
@@ -60,8 +57,8 @@ public class CategoryController {
      * @return 카테고리 정보
      */
     @GetMapping("/{categoryId}")
-    public ResponseEntity<CategoryResponseDTO> getCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(convertToResponseDTO(cate));
+    public CategoryResponseDto getCategory(@PathVariable Long categoryId) {
+        return convertToResponseDTO(cate);
     }
 
     /**
@@ -71,8 +68,8 @@ public class CategoryController {
      * @return 수정된 카테고리 정보
      */
     @PutMapping("/{categoryId}")
-    public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Long categoryId, @RequestBody CategoryRequestDTO categoryRequest) {
-        return ResponseEntity.ok(convertToResponseDTO(cate));
+    public CategoryResponseDto updateCategory(@PathVariable Long categoryId, @RequestBody CategoryRequestDto categoryRequest) {
+        return convertToResponseDTO(cate);
     }
 
     /**
@@ -81,18 +78,15 @@ public class CategoryController {
      * @return 204 No Content
      */
     @DeleteMapping("/{categoryId}")
-    public ResponseEntity<?> delteCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.noContent().build();
+    public int deleteCategory(@PathVariable Long categoryId) {
+        return 1;
     }
 
-    private CategoryResponseDTO convertToResponseDTO(Category cate) {
-        return CategoryResponseDTO.builder()
+    private CategoryResponseDto convertToResponseDTO(Category cate) {
+        return CategoryResponseDto.builder()
                 .categoryId(cate.getCategoryId())
                 .categoryName(cate.getCategoryName())
-                .parentCategory(null)
-                .userId(cate.getUserId())
-                .categoryRegDate(cate.getCategoryRegDate())
-                .categoryUpdateDate(cate.getCategoryUpdateDate())
+                .categoryName(cate.getCategoryName())
                 .build();
     }
 }
