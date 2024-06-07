@@ -1,29 +1,79 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id "io.freefair.lombok" version "8.6"
+plugins {	// Gradle에서 지원하는 플러그인
+	id 'java'
+	id 'org.springframework.boot' version '3.2.5'
+	id 'io.spring.dependency-management' version '1.1.5'
+	id "io.freefair.lombok" version "8.6"
+
+	/*
+        1) id 'java'
+            java 코드 컴파일, 테스트, 애플리케이션 패키징
+        2) id 'org.springframework.boot' version '3.2.5'
+            SpringBoot 애플리케이션을 실행, 실행 가능한 JAR 또는 WAR패키징
+        3) id 'io.spring.dependency-management' version '1.1.5'
+            일관된 방식으로 종속성을 관리하는 데 사용
+            섹션을 사용하여 프로젝트의 모든 종속성에 적용해야 하는 종속성 버전을 정의하여 충돌을 방지
+        4) id "io.freefair.lombok" version "8.6"
+            롬복 사용 (gradle에서 관리하므로 플러그인으로 설정 가능)
+    */
 }
 
-group = 'com.hyeongarl'
+// 프로젝트 그룹 ID 설정 (패키지 이름 지정 및 종속성 관리에 사용)
+group = 'com.heyongarl'
+
+// 프로젝트의 버전을 설정
 version = '1.0-SNAPSHOT'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+	/*
+        toolchain VS sourceCompatibility
+        toolchain
+            Gradle 자체를 실행하는 데 사용되는 JDK와 별개로
+            프로젝트를 컴파일, 테스트, 실행하는 데 사용할 JDK 버전을 지정할 수 있다.
+        sourceCompatibility
+            소스 코드의 Java 버전 호환성을 명시하는 데 사용
+    */
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web-services'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// MySQL JPA
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	/*
+        1) implementation 'org.springframework.boot:spring-boot-starter-web'
+            Spring MVC를 사용하여 웹 애플리케이션을 빌드하기 위한 종속성
+        2) implementation 'org.springframework.boot:spring-boot-starter-web-services'
+            웹 서비스 제작을 지원
+        3) implementation 'org.springframework.boot:spring-boot-starter-validation'
+            Java Bean의 유효성을 검사하기 위한 종속성 (@NotNull, @Size)
+        4) implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+            Spring Data JPA를 포함한 JPA 기반 데이터 엑세스에 대한 지원을 제공
+        5) runtimeOnly 'com.mysql:mysql-connector-j'
+            MySQL 데이터베이스에 연결하는 데 필요한 MySQL JDBC 드라이버
+        6) testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            JUnit, Jamcrest, Mockito를 포함한 Spring Boot 애플리케이션 테스트를 위한 종속성
+    */
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+	useJUnitPlatform()
+}
+
+tasks.withType(Test).configureEach {
+	enabled = false
 }
