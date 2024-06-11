@@ -1,34 +1,17 @@
 services:
-  app:
-    container_name: server
-    build:
-      context: .
-      dockerfile: ./api/Dockerfile
-    ports:
-      - "8081:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqlDB:3306/hyeongarl?serverTimezone=Asia/Seoul
-      SPRING_DATASOURCE_USERNAME: 'hyeongarl'
-      SPRING_DATASOURCE_PASSWORD: 'hyeongarl@45'
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - hyeongarl_network
-
   mysql:
-    container_name: mysqlDB
+    container_name: hyeongarldb
     image: mysql/mysql-server:latest
     environment:
-      MYSQL_DATABASE: 'hyeongarl'
-      MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: root
-      TZ: 'Asia/Seoul'
-      MYSQL_USER: 'hyeongarl'
-      MYSQL_HOST: '%'
-      MYSQL_PASSWORD: 'hyeongarl@45'
+      MYSQL_DATABASE: hyeongarl
+      MYSQL_USER: hyeongarl
+      MYSQL_PASSWORD: hyeongarl@45
+      TZ: Asia/Seoul
     ports:
-      - "3307:3306"
+      - 3307:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - hyeongarl_network
     healthcheck:
@@ -37,5 +20,25 @@ services:
       timeout: 10s
       retries: 2
 
+  app:
+    container_name: server
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    ports:
+      - 8081:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hyeongarldb:3306/hyeongarl?serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: hyeongarl
+      SPRING_DATASOURCE_PASSWORD: hyeongarl@45
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - hyeongarl_network
+
 networks:
   hyeongarl_network:
+
+volumes:
+  mysql_data:

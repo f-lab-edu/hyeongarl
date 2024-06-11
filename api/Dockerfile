@@ -1,28 +1,28 @@
 #syntax=docker/dockerfile:1
 
 # Base image
-FROM bellsoft/liberica-openjdk-alpine:17
+FROM openjdk:17-jdk-alpine as builder
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the build.gradle and gradle folder
-COPY api/build.gradle ./
+# Copy Gradle Wrapper
 COPY gradlew ./gradlew
 COPY gradle ./gradle
-COPY settings.gradle ./
 
+# Copy project files
+COPY settings.gradle ./
+COPY api/build.gradle ./
 COPY api/src ./src
 
 # Build the application
-RUN ./gradlew clean build --no-daemon
+RUN ./gradlew clean build
 
-ARG JAR_FILE=/api/build/libs/*.jar
+FROM openjdk:17-jdk-alpine
 
-COPY ${JAR_FILE} /app/app.jar
+WORKDIR /app
 
-# Expose the port the app runs on
-EXPOSE 8080
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
