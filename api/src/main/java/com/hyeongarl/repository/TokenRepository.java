@@ -42,4 +42,9 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "WHERE t.token = :token " +
             "AND t.expiryDate > :now")
     Optional<Token> findByTokenAndExpiryDate(String token, LocalDateTime now);
+
+    @Query("SELECT t.userId " +
+            "FROM Token t " +
+            "WHERE t.token = :token")
+    Long findUserIDByToken(String token);
 }
