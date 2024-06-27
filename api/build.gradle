@@ -54,6 +54,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	/*
         1) implementation 'org.springframework.boot:spring-boot-starter-web'
             Spring MVC를 사용하여 웹 애플리케이션을 빌드하기 위한 종속성
@@ -67,6 +69,10 @@ dependencies {
             MySQL 데이터베이스에 연결하는 데 필요한 MySQL JDBC 드라이버
         6) testImplementation 'org.springframework.boot:spring-boot-starter-test'
             JUnit, Jamcrest, Mockito를 포함한 Spring Boot 애플리케이션 테스트를 위한 종속성
+        7) implementation 'org.springframework.boot:spring-boot-starter-security'
+        	보안과 관련된 기능을 제공하는 스프링 보안 모듈에 대한 스타터 의존성
+        	인증(Authentication)과 권한 부여(Authorization)을 위한 기능을 제공
+        	웹 애플리케이션의 보안을 강화하는데 사용
     */
 }
 
