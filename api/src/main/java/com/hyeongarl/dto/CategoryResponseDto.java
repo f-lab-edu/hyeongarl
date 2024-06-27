@@ -1,25 +1,25 @@
 package com.hyeongarl.dto;
 
+import com.hyeongarl.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CategoryResponseDto {
     private Long categoryId;
-    private String categoryName;
-    private Long userId;
-    
-    private CategoryResponseDto parentCategory; // 상위 카테고리 정보 (최상위까지 재귀적 참조)
-    private List<CategoryResponseDto> subCategories;
-    
-    private LocalDateTime categoryRegDate;
-    private LocalDateTime categoryUpdateDate;
+    private Map<String, Object> categoryTree;
+
+    public static CategoryResponseDto fromEntity(Category category) {
+        return CategoryResponseDto.builder()
+                .categoryId(category.getCategoryId())
+                .categoryTree(category.getCategoryTree())
+                .build();
+    }
 }
