@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: api
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hyeongarl_test?serverTimezone=Asia/Seoul
+    username: hyeongarl
+    password: hyeongarl@45
+
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    database: mysql
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: trace
