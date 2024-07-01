@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -116,12 +118,29 @@ public class CategoryServiceTest {
     @DisplayName("Category 수정")
     class updateCategoryTests {
         @Test
-        @DisplayName("update_success")
-        void updateCategory_success() {
+        @DisplayName("updateAsync_success")
+        void updateCategoryAsync_success() throws ExecutionException, InterruptedException {
             when(categoryRepository.findByUserId(anyLong())).thenReturn(Optional.ofNullable(category));
             when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-            Category update = categoryService.updateCategory(categoryRequest.toEntity(), 1L);
+            CompletableFuture<Category> result
+                    = categoryService.updateCategory(categoryRequest.toEntity(), 1L);
+            Category update = result.get();
+
+            assertNotNull(update);
+            assertEquals(categoryTree, update.getCategoryTree());
+
+            verify(categoryRepository, times(1)).findByUserId(anyLong());
+            verify(categoryRepository, times(1)).save(any(Category.class));
+        }
+        @Test
+        @DisplayName("updateSync_success")  // CompletableFuture 적용
+        void updateCategorySync_success() {
+            when(categoryRepository.findByUserId(anyLong())).thenReturn(Optional.ofNullable(category));
+            when(categoryRepository.save(any(Category.class))).thenReturn(category);
+
+            Category update
+                    = categoryService.updateCategorySync(categoryRequest.toEntity(), 1L);
 
             assertNotNull(update);
             assertEquals(categoryTree, update.getCategoryTree());

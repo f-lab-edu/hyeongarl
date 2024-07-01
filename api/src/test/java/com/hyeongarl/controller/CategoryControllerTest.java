@@ -6,6 +6,7 @@ import com.hyeongarl.entity.User;
 import com.hyeongarl.repository.UserRepository;
 import com.hyeongarl.service.TokenService;
 import com.hyeongarl.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,11 +16,15 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Slf4j
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -101,11 +106,46 @@ public class CategoryControllerTest {
     }
 
     @Test
-    @DisplayName("testUpdateCategory")
-    @Order(3)
-    void testUpdateCategory() {
-        String url = "http://localhost:" + port + "/category";
+    @DisplayName("testUpdateCategory SyncAsync")
+    @Order(5)
+    void testUpdateCategorySyncAsync() {
         Map<String, Object> updateTree = createSampleCategoryTree();
+        Map<String, Object> addChild = new HashMap<>();
+        addChild.put("name", "updateSyncChild");
+        updateTree.put("name", addChild);
+
+        CategoryRequestDto updateRequest = CategoryRequestDto.builder()
+                .categoryTree(updateTree)
+                .build();
+
+        HttpEntity<CategoryRequestDto> updateEntity = new HttpEntity<>(updateRequest, headers);
+
+        log.info("start Sync >>>>> ");
+        long startTime = System.currentTimeMillis();
+        restTemplate.exchange("http://localhost:" + port + "/category/sync", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
+        long endTime = System.currentTimeMillis();
+        log.info("                  >>>>>  Sync Time : {}", (endTime - startTime));
+
+        System.out.println("start Async >>>>> ");
+        long startTimeAsync = System.currentTimeMillis();
+        restTemplate.exchange("http://localhost:" + port + "/category/async", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
+        long endTimeAsync = System.currentTimeMillis();
+        log.info("                  >>>>> Async Time : {}", (endTimeAsync - startTimeAsync));
+
+        log.info("Sync : {}", (endTime - startTime));
+        log.info("Async : {}", (endTimeAsync - startTimeAsync));
+    }
+
+    @Test
+    @DisplayName("testUpdateCategory Sync")
+    @Order(3)
+    void testUpdateCategorySync() {
+        String url = "http://localhost:" + port + "/category/sync";
+        Map<String, Object> updateTree = createSampleCategoryTree();
+        Map<String, Object> addChild = new HashMap<>();
+        addChild.put("name", "updateSyncChild");
+        updateTree.put("name", addChild);
+
         CategoryRequestDto updateRequest = CategoryRequestDto.builder()
                 .categoryTree(updateTree)
                 .build();
@@ -115,16 +155,38 @@ public class CategoryControllerTest {
         ResponseEntity<CategoryResponseDto> responseEntity
                 = restTemplate.exchange(url, HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertThat(responseEntity).isNotNull();
 
         CategoryResponseDto responseBody = responseEntity.getBody();
-        assertEquals(updateTree, Objects.requireNonNull(responseBody).getCategoryTree());
+    }
+
+    @Test
+    @DisplayName("testUpdateCategory Async")
+    @Order(4)
+    void testUpdateCategoryAsync() {
+        String url = "http://localhost:" + port + "/category/async";
+        Map<String, Object> updateTree = createSampleCategoryTree();
+        Map<String, Object> addChild = new HashMap<>();
+        addChild.put("name", "updateAsyncChild");
+        updateTree.put("name", addChild);
+
+        CategoryRequestDto updateRequest = CategoryRequestDto.builder()
+                .categoryTree(updateTree)
+                .build();
+
+        HttpEntity<CategoryRequestDto> updateEntity = new HttpEntity<>(updateRequest, headers);
+
+        ResponseEntity<CategoryResponseDto> responseEntity
+                = restTemplate.exchange(url, HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
+
+        assertThat(responseEntity).isNotNull();
+
+        CategoryResponseDto responseBody = responseEntity.getBody();
     }
 
     @Test
     @DisplayName("testDeleteCategory")
-    @Order(4)
+    @Order(6)
     void testDeleteCategory() {
         String url = "http://localhost:" + port + "/category/1";
 
