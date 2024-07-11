@@ -120,17 +120,13 @@ public class CategoryControllerTest {
 
         HttpEntity<CategoryRequestDto> updateEntity = new HttpEntity<>(updateRequest, headers);
 
-        log.info("start Sync >>>>> ");
         long startTime = System.currentTimeMillis();
         restTemplate.exchange("http://localhost:" + port + "/category/sync", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
         long endTime = System.currentTimeMillis();
-        log.info("                  >>>>>  Sync Time : {}", (endTime - startTime));
 
-        System.out.println("start Async >>>>> ");
         long startTimeAsync = System.currentTimeMillis();
         restTemplate.exchange("http://localhost:" + port + "/category/async", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
         long endTimeAsync = System.currentTimeMillis();
-        log.info("                  >>>>> Async Time : {}", (endTimeAsync - startTimeAsync));
 
         log.info("Sync : {}", (endTime - startTime));
         log.info("Async : {}", (endTimeAsync - startTimeAsync));
