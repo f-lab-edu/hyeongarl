@@ -35,7 +35,7 @@ public class ApiFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
+      
         // 토큰 확인
         String token = request.getHeader("token");
         if(token == null) {
