@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
@@ -34,4 +35,16 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "WHERE t.userId= :userId " +
             "AND t.expiryDate < :now")
     boolean existsByUserIdAndExpiryDate(Long userId, LocalDateTime now);
+
+    // 유효한 토큰 확인
+    @Query("SELECT t " +
+            "FROM Token t " +
+            "WHERE t.token = :token " +
+            "AND t.expiryDate > :now")
+    Optional<Token> findByTokenAndExpiryDate(String token, LocalDateTime now);
+
+    @Query("SELECT t.userId " +
+            "FROM Token t " +
+            "WHERE t.token = :token")
+    Long findUserIDByToken(String token);
 }

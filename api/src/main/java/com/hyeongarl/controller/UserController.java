@@ -16,7 +16,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDto addUser(@Valid @RequestBody UserRequestDto userRequest) {
+    public UserResponseDto saveUser(@Valid @RequestBody UserRequestDto userRequest) {
         return UserResponseDto.fromEntity(userService.save(userRequest.toEntity()));
     }
 }

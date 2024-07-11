@@ -7,6 +7,9 @@ import com.hyeongarl.repository.TokenRepository;
 import com.hyeongarl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,22 +22,22 @@ public class TokenService {
 
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public String login(User userRequest) {
         LocalDateTime now = LocalDateTime.now();
 
         // 사용자 정보 확인
         User user = userRepository.findByUserEmail(userRequest.getUserEmail())
-                .orElseThrow(UserNotFoundException::new);;
+                .orElseThrow(UserNotFoundException::new);
 
-        // 비밀번호 확인
-        if(!user.getPassword().equals(userRequest.getPassword())) {
+        // 비밀번호 불일치
+        if(!bCryptPasswordEncoder.matches(userRequest.getPassword(),(user.getPassword()))) {
             throw new UserNotFoundException();
         }
 
-        log.info("확인");
+        // 만료된 토큰 있는 경우 삭제
         if(tokenRepository.existsByUserIdAndExpiryDate(user.getUserId(), now)) {
-            log.info("만료된 토큰 있음");
             tokenRepository.deleteExpiredTokenByUserIdAndExpiryDate(user.getUserId(), now);
         }
 
@@ -42,7 +45,7 @@ public class TokenService {
 
         // 인증 토큰 없는 경우
         if(validateToken == null) {
-            String token = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
+            String token = UUID.randomUUID() + "-" + System.currentTimeMillis();
 
             Token saveToken = Token.builder()
                     .token(token)
@@ -53,5 +56,13 @@ public class TokenService {
             return token;
         }
         return validateToken.getToken();
+    }
+
+    public Long getUserId() {
+        UsernamePasswordAuthenticationToken authentication =
+                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String token = authentication.getPrincipal().toString();
+
+        return tokenRepository.findUserIDByToken(token);
     }
 }
