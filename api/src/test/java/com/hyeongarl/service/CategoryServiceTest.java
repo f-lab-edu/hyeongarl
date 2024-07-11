@@ -133,6 +133,7 @@ public class CategoryServiceTest {
             verify(categoryRepository, times(1)).findByUserId(anyLong());
             verify(categoryRepository, times(1)).save(any(Category.class));
         }
+      
         @Test
         @DisplayName("updateSync_success")  // CompletableFuture 적용
         void updateCategorySync_success() {

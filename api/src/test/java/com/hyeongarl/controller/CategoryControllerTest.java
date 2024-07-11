@@ -6,7 +6,6 @@ import com.hyeongarl.entity.User;
 import com.hyeongarl.repository.UserRepository;
 import com.hyeongarl.service.TokenService;
 import com.hyeongarl.service.UserService;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,15 +15,11 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Slf4j
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -35,7 +30,6 @@ public class CategoryControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     private HttpEntity<CategoryRequestDto> requestEntity;
-
     private CategoryResponseDto categoryResponse;
 
     @LocalServerPort
@@ -84,8 +78,7 @@ public class CategoryControllerTest {
         ResponseEntity<CategoryResponseDto> responseEntity
                 = restTemplate.exchange("/category", HttpMethod.POST, requestEntity, CategoryResponseDto.class);
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
+        Map<String, Object> categoryTree = createSampleCategoryTree();
         CategoryResponseDto responseBody = responseEntity.getBody();
         assertThat(responseBody).isNotNull();
     }

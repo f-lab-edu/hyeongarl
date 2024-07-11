@@ -10,8 +10,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +29,7 @@ public class CategoryService {
         category.setUserId(userId);
         return categoryRepository.save(category);
     }
+  
     /** Async 비교 **/
     @CachePut(value = "category", key = "#userId")
     public CompletableFuture<Category> updateCategory(Category category, Long userId) {
@@ -68,6 +67,7 @@ public class CategoryService {
     @CachePut(value = "category", key = "#userId")
     public Category updateCategorySync(Category category, Long userId) {
         long startTime = System.currentTimeMillis();
+
         Category existCategory = categoryRepository.findByUserId(userId)
                 .orElseThrow(CategoryNotFoundException::new);
         existCategory.setCategoryTree(category.getCategoryTree() != null ?

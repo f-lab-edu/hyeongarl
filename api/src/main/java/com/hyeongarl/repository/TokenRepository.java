@@ -26,8 +26,9 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "FROM Token " +
             "WHERE userId= :userId " +
             "AND expiryDate < :now")
-    void deleteExpiredTokenByUserIdAndExpiryDate(@Param("userId") Long userId, @Param("now")LocalDateTime now);
+    void deleteExpiredTokenByUserIdAndExpiryDate(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 
+    // 만료된 토큰 확인
     @Query("SELECT " +
             "CASE WHEN COUNT(t) > 0 THEN true " +
             "ELSE false END " +

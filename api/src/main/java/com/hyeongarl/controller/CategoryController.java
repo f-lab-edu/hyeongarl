@@ -50,7 +50,6 @@ public class CategoryController {
         return CategoryResponseDto.fromEntity(categoryService.updateCategorySync(categoryRequest.toEntity(), tokenService.getUserId()));
     }
 
-
     // 사용자 탈퇴시 전체 삭제
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
