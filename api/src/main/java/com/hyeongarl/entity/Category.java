@@ -1,23 +1,27 @@
 package com.hyeongarl.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.hyeongarl.util.TreeConverter;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
+@Entity
+@Table(name="category")
 @Builder
+@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
-    private String categoryName;
-    private Long categoryPreId;
+
+    @Column(name = "user_id")
     private Long userId;
 
-    private LocalDateTime categoryRegDate;
-    private LocalDateTime categoryUpdateDate;
+    @Convert(converter = TreeConverter.class)
+    @Column(name = "category_tree", columnDefinition = "TEXT")
+    private Map<String, Object> categoryTree;
 }
