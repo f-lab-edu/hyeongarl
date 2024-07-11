@@ -22,13 +22,11 @@ public class SecurityConfig {
 
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
-        Logger.logging("Security Config : passwordEncoder()");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        Logger.logging("Security Config : filterChain()");
         return httpSecurity
                 .authorizeHttpRequests(
                         // 특정 경로에 대한 엑세스 설정
@@ -43,7 +41,6 @@ public class SecurityConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        Logger.logging("ApiConfig : objectMapper()");
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

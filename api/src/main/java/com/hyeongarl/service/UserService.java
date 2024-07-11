@@ -8,12 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-/*
-    @Service
-        Spring Framework에 의해 관리되는 서비스 클래스임을 명시
-    @RequiredArgsConstructor
-        롬복 라이브러리에서 final 필드에 대한 생성자를 자동으로 생성
- */
 @Service
 @RequiredArgsConstructor
 public class UserService {

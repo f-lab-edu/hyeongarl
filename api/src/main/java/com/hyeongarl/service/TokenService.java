@@ -61,14 +61,10 @@ public class TokenService {
     }
 
     public Long getUserId() {
-        Logger.servicelogging("getUserId");
         UsernamePasswordAuthenticationToken authentication =
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String token = authentication.getPrincipal().toString();
-        log.info("token : {}", token);
-        Long userId = tokenRepository.findUserIDByToken(token);
-        log.info("userId : {}", userId);
 
-        return userId;
+        return tokenRepository.findUserIDByToken(token);
     }
 }

@@ -30,14 +30,12 @@ public class ApiFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        Logger.logging("ApiFilter : doFilterInternal()");
-
         String requestURI = request.getRequestURI();
         if(requestURI.startsWith("/login") || requestURI.startsWith("/user")) {
             filterChain.doFilter(request, response);
             return;
         }
-
+      
         // 토큰 확인
         String token = request.getHeader("token");
         if(token == null) {
