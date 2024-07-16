@@ -1,6 +1,5 @@
 package com.hyeongarl.controller;
 
-import com.hyeongarl.config.Logger;
 import com.hyeongarl.dto.UserRequestDto;
 import com.hyeongarl.dto.UserResponseDto;
 import com.hyeongarl.service.UserService;

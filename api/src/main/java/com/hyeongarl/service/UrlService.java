@@ -1,6 +1,5 @@
 package com.hyeongarl.service;
 
-import com.hyeongarl.config.Logger;
 import com.hyeongarl.dto.UrlRequestDto;
 import com.hyeongarl.entity.Url;
 import com.hyeongarl.error.UrlAlreadyExistException;
@@ -27,7 +26,6 @@ public class UrlService {
      * @return 저장된 url 정보
      */
     public Url save(Url url) {
-        Logger.servicelogging("save");
         url.setUserId(tokenService.getUserId());
 
         // url 유효성 검사
@@ -48,7 +46,6 @@ public class UrlService {
      * @return 조회한 url 정보
      */
     public Url getUrl(Long urlId) {
-        Logger.servicelogging("getUrl");
         return urlRepository.findByUrlIdAndUserId(urlId, tokenService.getUserId())
                 .orElseThrow(UrlNotFoundException::new);
     }
@@ -59,7 +56,6 @@ public class UrlService {
      * @return 조회한 Url 목록
      */
     public Page<Url> getUrls(Pageable pageable) {
-        Logger.servicelogging("getUrls");
         return urlRepository.findAllByUserId(pageable, tokenService.getUserId());
     }
 
@@ -70,7 +66,6 @@ public class UrlService {
      * @return 수정된 url 정보
      */
     public Url updateUrl(Long urlId, UrlRequestDto urlRequest) {
-        Logger.servicelogging("updateUrl");
         Url url = getUrl(urlId);
 
         // url 중복인 경우
@@ -96,7 +91,6 @@ public class UrlService {
      * @param urlId 삭제할 url Id
      */
     public void deleteUrl(Long urlId) {
-        Logger.servicelogging("deleteUrl");
         urlRepository.deleteById(urlId);
     }
 }

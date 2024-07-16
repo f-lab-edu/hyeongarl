@@ -1,6 +1,5 @@
 package com.hyeongarl.service;
 
-import com.hyeongarl.config.Logger;
 import com.hyeongarl.entity.Token;
 import com.hyeongarl.entity.User;
 import com.hyeongarl.error.UserNotFoundException;
@@ -26,7 +25,6 @@ public class TokenService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public String login(User userRequest) {
-        Logger.servicelogging("login");
         LocalDateTime now = LocalDateTime.now();
 
         // 사용자 정보 확인
