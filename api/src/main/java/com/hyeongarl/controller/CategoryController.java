@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,20 +33,6 @@ public class CategoryController {
     public CompletableFuture<CategoryResponseDto> updateCategory(@RequestBody CategoryRequestDto categoryRequest) {
         return categoryService.updateCategory(categoryRequest.toEntity(), tokenService.getUserId())
                 .thenApply(CategoryResponseDto::fromEntity);
-    }
-
-    /** Async 비교 **/
-    @PutMapping("/async")
-    public CategoryResponseDto updateCategoryAsync(@RequestBody CategoryRequestDto categoryRequest) throws ExecutionException, InterruptedException {
-        CompletableFuture<CategoryResponseDto> update = categoryService.updateCategoryAsync(categoryRequest.toEntity(), tokenService.getUserId())
-                .thenApply(CategoryResponseDto::fromEntity);
-        return update.get();
-    }
-
-    /** Sync 비교 **/
-    @PutMapping("/sync")
-    public CategoryResponseDto updateCategorySync(@RequestBody CategoryRequestDto categoryRequest) {
-        return CategoryResponseDto.fromEntity(categoryService.updateCategorySync(categoryRequest.toEntity(), tokenService.getUserId()));
     }
 
     // 사용자 탈퇴시 전체 삭제
