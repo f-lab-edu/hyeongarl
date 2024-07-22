@@ -71,6 +71,18 @@ public class TokenService {
         return tokenRepository.findUserIDByToken(token);
     }
 
+    public void logout() {
+        Long userId = getUserId();
+        UsernamePasswordAuthenticationToken authentication =
+                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String token = authentication.getPrincipal().toString();
+
+        tokenRepository.deleteByToken(token);
+        sendMessage("logout-topic", token, userId);
+        SecurityContextHolder.clearContext();
+
+    }
+
     public void sendMessage(String topic, String token, Long userId) {
         kafkaTemplate.send(topic, token, userId);
     }

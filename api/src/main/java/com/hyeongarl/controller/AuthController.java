@@ -22,8 +22,9 @@ public class AuthController {
                 .body("로그인 성공");
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/out")
     public ResponseEntity<String> logout() {
+        tokenService.logout();
         return ResponseEntity.ok("로그아웃이 성공적으로 처리되었습니다.");
     }
 }

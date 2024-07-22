@@ -72,4 +72,14 @@ public class CategoryService {
             log.error("유효하지 않은 userId 형식입니다: {}", userId, e);
         }
     }
+
+    // 로그아웃 시, 사용자 카테고리 캐시에 업로드
+    @KafkaListener(topics = "logout-topic", groupId = "logout-remove")
+    public void removeCategory(Long userId) {
+        try {
+            cacheManager.getCache("category").evict(userId);
+        } catch (NumberFormatException e) {
+            log.error("캐시에서 카테고리 삭제 중 오류가 발생했습니다.: {}", userId, e);
+        }
+    }
 }

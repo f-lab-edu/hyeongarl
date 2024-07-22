@@ -48,4 +48,9 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "FROM Token t " +
             "WHERE t.token = :token")
     Long findUserIDByToken(String token);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Token t WHERE t.token = :token")
+    void deleteByToken(@Param("token") String token);
 }
