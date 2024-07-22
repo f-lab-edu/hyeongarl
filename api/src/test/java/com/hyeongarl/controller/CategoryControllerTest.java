@@ -12,11 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,61 +107,10 @@ public class CategoryControllerTest {
     }
 
     @Test
-    @DisplayName("testUpdateCategory SyncAsync")
-    @Order(5)
-    void testUpdateCategorySyncAsync() {
-        Map<String, Object> updateTree = createSampleCategoryTree();
-        Map<String, Object> addChild = new HashMap<>();
-        addChild.put("name", "updateSyncChild");
-        updateTree.put("name", addChild);
-
-        CategoryRequestDto updateRequest = CategoryRequestDto.builder()
-                .categoryTree(updateTree)
-                .build();
-
-        HttpEntity<CategoryRequestDto> updateEntity = new HttpEntity<>(updateRequest, headers);
-
-        long startTime = System.currentTimeMillis();
-        restTemplate.exchange("http://localhost:" + port + "/category/sync", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
-        long endTime = System.currentTimeMillis();
-
-        long startTimeAsync = System.currentTimeMillis();
-        restTemplate.exchange("http://localhost:" + port + "/category/async", HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
-        long endTimeAsync = System.currentTimeMillis();
-
-        log.info("Sync : {}", (endTime - startTime));
-        log.info("Async : {}", (endTimeAsync - startTimeAsync));
-    }
-
-    @Test
-    @DisplayName("testUpdateCategory Sync")
-    @Order(3)
-    void testUpdateCategorySync() {
-        String url = "http://localhost:" + port + "/category/sync";
-        Map<String, Object> updateTree = createSampleCategoryTree();
-        Map<String, Object> addChild = new HashMap<>();
-        addChild.put("name", "updateSyncChild");
-        updateTree.put("name", addChild);
-
-        CategoryRequestDto updateRequest = CategoryRequestDto.builder()
-                .categoryTree(updateTree)
-                .build();
-
-        HttpEntity<CategoryRequestDto> updateEntity = new HttpEntity<>(updateRequest, headers);
-
-        ResponseEntity<CategoryResponseDto> responseEntity
-                = restTemplate.exchange(url, HttpMethod.PUT, updateEntity, CategoryResponseDto.class);
-
-        assertThat(responseEntity).isNotNull();
-
-        CategoryResponseDto responseBody = responseEntity.getBody();
-    }
-
-    @Test
     @DisplayName("testUpdateCategory Async")
     @Order(4)
     void testUpdateCategoryAsync() {
-        String url = "http://localhost:" + port + "/category/async";
+        String url = "http://localhost:" + port + "/category";
         Map<String, Object> updateTree = createSampleCategoryTree();
         Map<String, Object> addChild = new HashMap<>();
         addChild.put("name", "updateAsyncChild");

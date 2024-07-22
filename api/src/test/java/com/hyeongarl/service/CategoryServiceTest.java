@@ -133,22 +133,6 @@ public class CategoryServiceTest {
             verify(categoryRepository, times(1)).findByUserId(anyLong());
             verify(categoryRepository, times(1)).save(any(Category.class));
         }
-      
-        @Test
-        @DisplayName("updateSync_success")  // CompletableFuture 적용
-        void updateCategorySync_success() {
-            when(categoryRepository.findByUserId(anyLong())).thenReturn(Optional.ofNullable(category));
-            when(categoryRepository.save(any(Category.class))).thenReturn(category);
-
-            Category update
-                    = categoryService.updateCategorySync(categoryRequest.toEntity(), 1L);
-
-            assertNotNull(update);
-            assertEquals(categoryTree, update.getCategoryTree());
-
-            verify(categoryRepository, times(1)).findByUserId(anyLong());
-            verify(categoryRepository, times(1)).save(any(Category.class));
-        }
 
         @Test
         @DisplayName("update_fail_notFound")
