@@ -10,6 +10,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -58,5 +59,17 @@ public class CategoryService {
         Category existCategory = categoryRepository.findByUserId(userId)
                 .orElseThrow(CategoryNotFoundException::new);
         categoryRepository.delete(existCategory);
+    }
+
+    // 로그인 시, 사용자 카테고리 캐시에 업로드
+    @KafkaListener(topics = "login-topic", groupId = "login-upload")
+    public void loadCategory(Long userId) {
+        try {
+            Category category = categoryRepository.findByUserId(userId)
+                    .orElseThrow(CategoryNotFoundException::new);
+            cacheManager.getCache("category").put(userId, category);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 userId 형식입니다: {}", userId, e);
+        }
     }
 }

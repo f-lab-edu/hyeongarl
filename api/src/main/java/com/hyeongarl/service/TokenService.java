@@ -7,6 +7,7 @@ import com.hyeongarl.repository.TokenRepository;
 import com.hyeongarl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,6 +24,7 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final KafkaTemplate<String, Long> kafkaTemplate;
 
     public String login(User userRequest) {
         LocalDateTime now = LocalDateTime.now();
@@ -43,9 +45,10 @@ public class TokenService {
 
         Token validateToken = tokenRepository.findByUserIdAndExpiryDate(user.getUserId(), now);
 
+        String token;
         // 인증 토큰 없는 경우
         if(validateToken == null) {
-            String token = UUID.randomUUID() + "-" + System.currentTimeMillis();
+            token = UUID.randomUUID() + "-" + System.currentTimeMillis();
 
             Token saveToken = Token.builder()
                     .token(token)
@@ -53,9 +56,11 @@ public class TokenService {
                     .build();
 
             tokenRepository.save(saveToken);
-            return token;
+        } else {
+            token = validateToken.getToken();
         }
-        return validateToken.getToken();
+        sendMessage("login-topic", token, user.getUserId());
+        return token;
     }
 
     public Long getUserId() {
@@ -64,5 +69,9 @@ public class TokenService {
         String token = authentication.getPrincipal().toString();
 
         return tokenRepository.findUserIDByToken(token);
+    }
+
+    public void sendMessage(String topic, String token, Long userId) {
+        kafkaTemplate.send(topic, token, userId);
     }
 }
