@@ -11,16 +11,16 @@ import org.springframework.kafka.core.ProducerFactory;
 import java.util.Map;
 
 @Configuration
-public class LoginProducerConfig {
+public class LogoutProducerConfig {
     @Bean
-    public ProducerFactory<String, Long> loginProducer() {
+    public ProducerFactory<String, Long> logoutProducer() {
         Map<String, Object> config = CustomKafkaConfig.customProducer();
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         return new DefaultKafkaProducerFactory<>(config);
     }
 
-    @Bean(name = "loginTemplate")
+    @Bean(name = "logoutTemplate")
     public KafkaTemplate<String, Long> loginTemplate() {
-        return new KafkaTemplate<>(loginProducer());
+        return new KafkaTemplate<>(logoutProducer());
     }
 }

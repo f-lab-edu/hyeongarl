@@ -65,6 +65,9 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-streams'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 
+	// Jackson Databind for JSON serialization/deserialization
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 	/*
         1) implementation 'org.springframework.boot:spring-boot-starter-web'
             Spring MVC를 사용하여 웹 애플리케이션을 빌드하기 위한 종속성
