@@ -18,7 +18,7 @@ public class LogoutConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
-    @Bean
+    @Bean(name = "logoutListenerContainerFactory")
     public ConcurrentKafkaListenerContainerFactory<String, Long> logoutListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Long> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();

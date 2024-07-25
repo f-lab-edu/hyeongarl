@@ -62,7 +62,7 @@ public class CategoryService {
     }
 
     // 로그인 시, 사용자 카테고리 캐시에 업로드
-    @KafkaListener(topics = "login-topic", groupId = "login-upload")
+    @KafkaListener(topics = "login-topic", groupId = "login-upload", containerFactory = "loginListenerContainerFactory")
     public void loadCategory(Long userId) {
         try {
             Category category = categoryRepository.findByUserId(userId)
@@ -74,7 +74,7 @@ public class CategoryService {
     }
 
     // 로그아웃 시, 사용자 카테고리 캐시에 업로드
-    @KafkaListener(topics = "logout-topic", groupId = "logout-remove")
+    @KafkaListener(topics = "logout-topic", groupId = "logout-remove", containerFactory = "logoutListenerContainerFactory")
     public void removeCategory(Long userId) {
         try {
             cacheManager.getCache("category").evict(userId);

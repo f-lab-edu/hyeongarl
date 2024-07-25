@@ -7,6 +7,7 @@ import com.hyeongarl.repository.TokenRepository;
 import com.hyeongarl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,8 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Qualifier("loginTemplate")
     private final KafkaTemplate<String, Long> kafkaTemplate;
 
     public String login(User userRequest) {
