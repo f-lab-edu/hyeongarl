@@ -8,17 +8,29 @@ import com.hyeongarl.error.UrlNotFoundException;
 import com.hyeongarl.repository.UrlRepository;
 import com.hyeongarl.util.UrlValidator;
 import lombok.RequiredArgsConstructor;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class UrlService {
     private final UrlRepository urlRepository;
     private final TokenService tokenService;
+    @Qualifier("urlTemplate")
+    private final KafkaTemplate<String, Object> urlTemplate;
 
     /**
      * Url 등록
@@ -37,7 +49,10 @@ public class UrlService {
         if(urlRepository.existsByUrl(url.getUrl(), url.getUserId())) {
             throw new UrlAlreadyExistException();
         }
-        return urlRepository.save(url);
+
+        Url savedUrl = urlRepository.save(url);
+        sendMessage("saveUrl", savedUrl);
+        return savedUrl;
     }
 
     /**
@@ -92,5 +107,40 @@ public class UrlService {
      */
     public void deleteUrl(Long urlId) {
         urlRepository.deleteById(urlId);
+    }
+
+    void sendMessage(String topic, Url url) {
+        urlTemplate.send(topic, url);
+    }
+
+    @KafkaListener(topics = "saveUrl", groupId = "url", containerFactory = "urlListenerContainerFactory")
+    void saveUrlThumbnail(Url url) {
+        Map<String, String> thumbnail = new HashMap<>();
+        thumbnail.put("title", url.getUrlTitle());
+        thumbnail.put("url", url.getUrl());
+        thumbnail.put("urlId", url.getUrlId().toString());
+        try{
+            Document doc = Jsoup.connect(url.getUrl().toString()).get();
+            Elements elements = doc.select("meta[property^=og:]");
+
+            for(Element el : elements) {
+                switch(el.attr("property")) {
+                    case "og:site_name":
+                        thumbnail.put("siteName", el.attr("content"));
+                        break;
+                    case "og:description":
+                        thumbnail.put("description", url.getUrlDescription());
+                        break;
+                    case "og:image":
+                        thumbnail.put("image", el.attr("content"));
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        url.setThumbnail(thumbnail);
+        urlRepository.save(url);
     }
 }
