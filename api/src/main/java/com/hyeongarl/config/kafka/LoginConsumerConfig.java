@@ -12,16 +12,17 @@ import java.util.Map;
 
 @Configuration
 public class LoginConsumerConfig {
-    @Bean
+
     @Primary
+    @Bean
     public ConsumerFactory loginConsumer() {
         Map<String, Object> config = CustomKafkaConfig.customConsumer2();
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "login");
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
-    @Bean
     @Primary
+    @Bean(name = "loginListenerContainerFactory")
     public ConcurrentKafkaListenerContainerFactory<String, Long> loginListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Long> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();

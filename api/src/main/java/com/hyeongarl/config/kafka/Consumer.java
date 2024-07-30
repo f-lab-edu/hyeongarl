@@ -16,8 +16,8 @@ import java.util.Map;
 @EnableKafka
 public class Consumer {
 
-    @Bean
     @Primary
+    @Bean
     public ConsumerFactory<String, Object> urlConsumer() {
         Map<String, Object> configProps = CustomKafkaConfig.customConsumer();
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "url");
@@ -25,8 +25,8 @@ public class Consumer {
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
-    @Bean
     @Primary
+    @Bean(name = "urlListenerContainerFactory")
     public ConcurrentKafkaListenerContainerFactory<String, Object> urlListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Object> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();

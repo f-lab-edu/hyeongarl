@@ -48,7 +48,7 @@ public class UrlServiceTest {
     void getUrl_success() {
         Url url = new Url(1L, "http://getUrl.com",
                 "getUrl Title", "getUrl Description",
-                1L, 1L, null, null);
+                1L, 1L, null, null,null);
 
         when(urlRepository.findById(url.getUrlId())).thenReturn(Optional.of(url));
 
@@ -138,11 +138,11 @@ public class UrlServiceTest {
             Url existingUrl = new Url(
                     1L, "http://exist.com",
                     "exist Title", "exist Description",
-                    1L, 1L, null, null);
+                    1L, 1L, null, null, null);
             Url updateUrl = new Url(
                     1L, "http://updatecom",
                     "update Title", "update Description",
-                    1L, 1L, null, null);
+                    1L, 1L, null, null, null);
 
             when(urlRepository.findById(1L)).thenReturn(Optional.of(existingUrl));
             when(urlRepository.save(any(Url.class))).thenReturn(updateUrl);
