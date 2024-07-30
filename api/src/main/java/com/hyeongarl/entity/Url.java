@@ -1,10 +1,12 @@
 package com.hyeongarl.entity;
 
+import com.hyeongarl.util.TreeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name="urls")
@@ -39,6 +41,10 @@ public class Url {
 
     @Column(name = "url_update")
     private LocalDateTime urlUpdate;
+
+    @Convert(converter = TreeConverter.class)
+    @Column(name = "thumbnail", columnDefinition = "TEXT")
+    private Map<String, String> thumbnail;
 
     @PrePersist // 등록 시 자동으로 실행
     public void prePersist() {

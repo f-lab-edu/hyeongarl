@@ -5,21 +5,29 @@ import com.hyeongarl.error.CategoryNotFoundException;
 import com.hyeongarl.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final Executor customPool;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     // Look Aside : 캐시를 먼저 조회하고 데이터 없는 경우 DB에서 로드후 캐시에 저장
-    @Cacheable(value = "category", key = "#userId")
+    @Cacheable(value = "category", key = "#userId", unless = "#result == null")
     public Category getCategory(Long userId) {
         return categoryRepository.findByUserId(userId)
                 .orElseThrow(CategoryNotFoundException::new);
@@ -31,9 +39,7 @@ public class CategoryService {
         category.setUserId(userId);
         return categoryRepository.save(category);
     }
-  
-    /** Async 비교 **/
-    @CachePut(value = "category", key = "#userId")
+
     public CompletableFuture<Category> updateCategory(Category category, Long userId) {
         return CompletableFuture.supplyAsync(() -> {
             Category existCategory = categoryRepository.findByUserId(userId)
@@ -41,46 +47,11 @@ public class CategoryService {
             existCategory.setCategoryTree(category.getCategoryTree() != null ?
                     category.getCategoryTree() : existCategory.getCategoryTree());
 
-            return categoryRepository.save(existCategory);
-        });
-    }
+            Category savedCategory = categoryRepository.save(existCategory);
 
-    /** Async 비교 **/
-    @CachePut(value = "category", key = "#userId")
-    public CompletableFuture<Category> updateCategoryAsync(Category category, Long userId) {
-        long startTime = System.currentTimeMillis();
-
-        return CompletableFuture.supplyAsync(() -> {
-            Category existCategory = categoryRepository.findByUserId(userId)
-                    .orElseThrow(CategoryNotFoundException::new);
-            existCategory.setCategoryTree(category.getCategoryTree() != null ?
-                    category.getCategoryTree() : existCategory.getCategoryTree());
-
-            Category result = categoryRepository.save(existCategory);
-
-            long endTime = System.currentTimeMillis();
-            log.info("Async Service Time : {}", (endTime - startTime));
-
-            return result;
-        });
-    }
-
-    /** Sync 비교 **/
-    @CachePut(value = "category", key = "#userId")
-    public Category updateCategorySync(Category category, Long userId) {
-        long startTime = System.currentTimeMillis();
-
-        Category existCategory = categoryRepository.findByUserId(userId)
-                .orElseThrow(CategoryNotFoundException::new);
-        existCategory.setCategoryTree(category.getCategoryTree() != null ?
-                category.getCategoryTree() : existCategory.getCategoryTree());
-
-        Category result = categoryRepository.save(existCategory);
-
-        long endTime = System.currentTimeMillis();
-        log.info("Sync Service Time : {}", (endTime - startTime));
-
-        return result;
+            cacheManager.getCache("category").put(userId, savedCategory);
+            return savedCategory;
+        }, customPool);
     }
 
     @CacheEvict(value = "category", key = "#userId")
@@ -88,5 +59,27 @@ public class CategoryService {
         Category existCategory = categoryRepository.findByUserId(userId)
                 .orElseThrow(CategoryNotFoundException::new);
         categoryRepository.delete(existCategory);
+    }
+
+    // 로그인 시, 사용자 카테고리 캐시에 업로드
+    @KafkaListener(topics = "login-topic", groupId = "login-upload", containerFactory = "loginListenerContainerFactory")
+    public void loadCategory(Long userId) {
+        try {
+            Category category = categoryRepository.findByUserId(userId)
+                    .orElseThrow(CategoryNotFoundException::new);
+            cacheManager.getCache("category").put(userId, category);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 userId 형식입니다: {}", userId, e);
+        }
+    }
+
+    // 로그아웃 시, 사용자 카테고리 캐시에 업로드
+    @KafkaListener(topics = "logout-topic", groupId = "logout-remove", containerFactory = "logoutListenerContainerFactory")
+    public void removeCategory(Long userId) {
+        try {
+            cacheManager.getCache("category").evict(userId);
+        } catch (NumberFormatException e) {
+            log.error("캐시에서 카테고리 삭제 중 오류가 발생했습니다.: {}", userId, e);
+        }
     }
 }

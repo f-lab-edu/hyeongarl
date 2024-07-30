@@ -60,6 +60,16 @@ dependencies {
 	// Cache
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.apache.kafka:kafka-streams'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+	// Jackson Databind for JSON serialization/deserialization
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// Jsoup
+	implementation 'org.jsoup:jsoup:1.15.3'
 	/*
         1) implementation 'org.springframework.boot:spring-boot-starter-web'
             Spring MVC를 사용하여 웹 애플리케이션을 빌드하기 위한 종속성
@@ -79,16 +89,23 @@ dependencies {
         	웹 애플리케이션의 보안을 강화하는데 사용
         8) implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         	redis 사용을 위한 의존성
+        9) implementation 'org.springframework.kafka:spring-kafka'
+        	kafka 사용 의존성
+        10) implementation 'org.jsoup:jsoup:1.15.3'
+			Jsoup 라이브러리로 HTML 파싱 및 웹 스크래핑에 사용
     */
 }
+
+ext['kafka.version'] = '3.5.0'
+ext['spring-kafka.version'] = '3.2.2'
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.withType(Test).configureEach {
-	enabled = false
-}
+//tasks.withType(Test).configureEach {
+//	enabled = false
+//}
 
 jar {
 	enabled = false

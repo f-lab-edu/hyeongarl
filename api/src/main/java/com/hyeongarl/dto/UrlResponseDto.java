@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -19,6 +20,7 @@ public class UrlResponseDto {
     private String urlTitle;
     private String urlDescription;
     private Long categoryId;
+    private Map<String, String> thumbnail;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime urlRegdate;
@@ -35,6 +37,7 @@ public class UrlResponseDto {
                 .categoryId(url.getCategoryId() == null ? null : url.getCategoryId())
                 .urlRegdate(url.getUrlRegdate() == null ? null : url.getUrlRegdate())
                 .urlUpdate(url.getUrlUpdate() == null ? null : url.getUrlUpdate())
+                .thumbnail(url.getThumbnail() == null ? null : url.getThumbnail())
                 .build();
     }
 }
